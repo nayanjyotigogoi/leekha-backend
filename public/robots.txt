@@ -1,2 +1,10 @@
 User-agent: *
-Disallow:
+Allow: /
+
+Sitemap: {{ url('/') }}/sitemap.xml
+
+# Optional: You can disallow sensitive routes if needed
+Disallow: /admin/
+Disallow: /api/
+Disallow: /login
+Disallow: /register

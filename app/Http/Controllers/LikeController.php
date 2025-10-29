@@ -36,6 +36,8 @@ class LikeController extends Controller
     // DELETE /api/likes → remove a like
     public function destroy(Request $request)
     {
+        $request->merge(json_decode($request->getContent(), true) ?? []);
+
         $data = $request->validate([
             'user_id' => 'nullable|exists:users,id',
             'target_type' => 'required|string|in:App\\Models\\Writing,App\\Models\\Comment',

@@ -9,6 +9,7 @@ use App\Http\Controllers\ReadersWallController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MediaController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\Api\AuthController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -19,6 +20,15 @@ use App\Http\Controllers\StatsController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+// To get logged-in user details
+Route::get('/user', function (Request $request) {
+    return $request->user();
+})->middleware('auth:sanctum');
+
 
 Route::get('/reading-stats', [StatsController::class, 'index']);
 Route::get('/writings', [WritingController::class, 'filter']);
@@ -50,6 +60,15 @@ Route::get('/writings/top-liked', [WritingController::class, 'topLiked']);
 
 Route::get('/personalized-readings', [WritingController::class, 'personalized']);
 
+
+
+// Route::get('/comments/{writing_id}', [CommentController::class, 'index']);
+Route::post('/comments', [CommentController::class, 'store']);
+Route::put('/comments/{id}', [CommentController::class, 'update']);
+Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
+Route::get('/comments/{writing_id}', [CommentController::class, 'index']);
+// Route::post('/comments', [CommentController::class, 'store']);
 
 // List comments for a writing
 Route::get('comments/{writing_id}', [CommentController::class, 'index']);

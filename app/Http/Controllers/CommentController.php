@@ -3,7 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Comment; 
+use App\Models\Comment;
+
 class CommentController extends Controller
 {
     // GET /api/comments/{writing_id}
@@ -11,7 +12,7 @@ class CommentController extends Controller
     {
         $comments = Comment::with('replies', 'likes')
             ->where('writing_id', $writing_id)
-            ->whereNull('parent_id') // Only top-level comments
+            ->whereNull('parent_id')
             ->latest()
             ->get();
 
@@ -21,13 +22,27 @@ class CommentController extends Controller
     // POST /api/comments
     public function store(Request $request)
     {
+        $user = $request->user(); // ← get logged-in user if Sanctum session exists
+
         $data = $request->validate([
             'writing_id' => 'required|exists:writings,id',
             'parent_id' => 'nullable|exists:comments,id',
-            'author_name' => 'required|string|max:100',
-            'author_email' => 'nullable|email|max:150',
             'content' => 'required|string',
+            'author_name' => 'nullable|string|max:100',
+            'author_email' => 'nullable|email|max:150',
         ]);
+
+        // 👇 if user is logged in, override name/email
+        if ($user) {
+            $data['user_id'] = $user->id;
+            $data['author_name'] = $user->name;
+            $data['author_email'] = $user->email;
+        } else {
+            // guests must provide a name
+            if (empty($data['author_name'])) {
+                return response()->json(['message' => 'Author name is required for guests'], 422);
+            }
+        }
 
         $comment = Comment::create($data);
 
